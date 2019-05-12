@@ -1,0 +1,86 @@
+import java_cup.runtime.*;
+
+import java.util.Map;
+import java.util.HashMap;
+
+parser code {:
+
+    private Map<String, Integer> idTable;
+
+    public void report_error(String message, Object info) {
+        StringBuilder m = new StringBuilder("Error ");
+        if (info instanceof java_cup.runtime.Symbol)
+            m.append("(").append(info.toString()).append(")");
+        m.append(" : ").append(message);
+        System.out.println(m);
+    }
+
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        throw new RuntimeException("Fatal Syntax Error");
+    }
+:};
+
+init with {:
+    idTable = new HashMap<>();
+:}
+
+terminal            LET;
+terminal            SEMICOLON, EQ;
+terminal            PLUS, MINUS, TIMES, DIVIDE, MOD;
+terminal Integer    INTEGER_LITERAL;
+terminal String     IDENTIFIER;
+
+non terminal            goal;
+non terminal            expression_list;
+non terminal            expression;
+non terminal            variable_declaration;
+non terminal Integer    operation;
+non terminal Integer    scalar;
+
+precedence left PLUS, MINUS;
+precedence left TIMES, DIVIDE, MOD;
+
+start with goal;
+
+goal                    ::= expression_list;
+
+expression_list         ::= expression_list expression SEMICOLON | expression SEMICOLON;
+
+expression              ::= variable_declaration
+                          |
+                            operation:op
+                            {: System.out.println(op); :}
+                          ;
+
+variable_declaration    ::= LET IDENTIFIER:id EQ operation:op
+                            {: idTable.put(id, op);
+                                System.out.println(id + " = " + op);
+                             :}
+                          ;
+
+operation               ::= scalar:s1 PLUS scalar:s2
+                            {: RESULT = s1 + s2; :}
+                          |
+                            scalar:s1 MINUS scalar:s2
+                            {: RESULT = s1 - s2; :}
+                          |
+                            scalar:s1 TIMES scalar:s2
+                            {: RESULT = s1 * s2; :}
+                          |
+                            scalar:s1 DIVIDE scalar:s2
+                            {: RESULT = s1 / s2; :}
+                          |
+                            scalar:s1 MOD scalar:s2
+                            {: RESULT = s1 % s2; :}
+                          |
+                            scalar:s
+                            {: RESULT = s; :}
+                          ;
+
+scalar                  ::= INTEGER_LITERAL:il
+                            {: RESULT = il; :}
+                          |
+                            IDENTIFIER:id
+                            {: RESULT = idTable.get(id); :}
+                          ;
