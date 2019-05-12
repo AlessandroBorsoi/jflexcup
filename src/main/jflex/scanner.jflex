@@ -1,4 +1,5 @@
 package it.uniupo.disit.linguaggi2.jflexcup.generated;
+
 import java_cup.runtime.*;
 
 /**
@@ -37,31 +38,42 @@ EndOfLineComment     = "//" {InputCharacter}* {LineTerminator}?
 DocumentationComment = "/**" {CommentContent} "*"+ "/"
 CommentContent       = ( [^*] | \*+ [^/*] )*
 
-Identifier = [:jletter:] [:jletterdigit:]*
+FLOAT = "float"
+INT = "int"
+PRINT = "print"
+ID = [a-z]+
+INUM = [0-9]+
+FNUM = [0-9]+.[0-9]+
+ASSIGN = "="
+PLUS = "+"
+MINUS = "-"
+TIMES = "*"
+DIV = "/"
 
-DecIntegerLiteral = 0 | [1-9][0-9]*
 
 %%
 
-<YYINITIAL> "let"                { return symbol(sym.LET); }
+<YYINITIAL> {FLOAT}              { return symbol(sym.FLOAT); }
+<YYINITIAL> {INT}                { return symbol(sym.INT); }
+<YYINITIAL> {PRINT}              { return symbol(sym.PRINT); }
 
 <YYINITIAL> {
   /* identifiers */
-  {Identifier}                   { return symbol(sym.IDENTIFIER, yytext()); }
+  {ID}                           { return symbol(sym.ID, yytext()); }
 
   /* literals */
-  {DecIntegerLiteral}            { return symbol(sym.INTEGER_LITERAL, new Integer(yytext())); }
+  {INUM}                         { return symbol(sym.INUM, new Integer(yytext())); }
+  {FNUM}                         { return symbol(sym.FNUM, new Float(yytext())); }
 
   /* separators */
-  ";"                            { return symbol(sym.SEMICOLON); }
+  {LineTerminator}               { return symbol(sym.SEPARATOR); }
 
   /* operators */
-  "="                            { return symbol(sym.EQ); }
-  "+"                            { return symbol(sym.PLUS); }
-  "-"                            { return symbol(sym.MINUS); }
-  "*"                            { return symbol(sym.TIMES); }
-  "/"                            { return symbol(sym.DIVIDE); }
-  "%"                            { return symbol(sym.MOD); }
+  {ASSIGN}                       { return symbol(sym.ASSIGN); }
+  {PLUS}                         { return symbol(sym.PLUS); }
+  {MINUS}                        { return symbol(sym.MINUS); }
+  {TIMES}                        { return symbol(sym.TIMES); }
+  {DIV}                          { return symbol(sym.DIV); }
 
   /* comments */
   {Comment}                      { /* ignore */ }

@@ -25,27 +25,41 @@ init with {:
     idTable = new HashMap<>();
 :}
 
-terminal            LET;
-terminal            SEMICOLON, EQ;
-terminal            PLUS, MINUS, TIMES, DIVIDE, MOD;
-terminal Integer    INTEGER_LITERAL;
-terminal String     IDENTIFIER;
+terminal            FLOAT, INT, PRINT;
+terminal            SEPARATOR, ASSIGN;
+terminal            PLUS, MINUS, TIMES, DIV;
+terminal Integer    INUM;
+terminal Float      FNUM;
+terminal String     ID;
 
-non terminal            goal;
-non terminal            expression_list;
-non terminal            expression;
-non terminal            variable_declaration;
+non terminal            Prog;
+non terminal            DSs;
+non terminal            Dcl;
+non terminal            Stm;
+non terminal            Expr;
+non terminal            Op;
+non terminal            Val;
 non terminal Integer    operation;
 non terminal Integer    scalar;
 
 precedence left PLUS, MINUS;
-precedence left TIMES, DIVIDE, MOD;
+precedence left TIMES, DIV;
 
-start with goal;
+start with Prog;
 
-goal                    ::= expression_list;
+Prog                    ::= DSs;
 
-expression_list         ::= expression_list expression SEMICOLON | expression SEMICOLON;
+DSs                     ::= Dcl DSs | Stm DSs | eps;
+
+Dcl                     ::= FLOAT ID | INT ID;
+
+Stm                     ::= ID ASSIGN Expr | PRINT ID;
+
+Expr                    ::= Expr Op Expr | Val;
+
+Op                      ::= PLUS | MINUS | TIMES | DIV;
+
+Val                     ::= INUM | FNUM | ID;
 
 expression              ::= variable_declaration
                           |
@@ -68,19 +82,16 @@ operation               ::= scalar:s1 PLUS scalar:s2
                             scalar:s1 TIMES scalar:s2
                             {: RESULT = s1 * s2; :}
                           |
-                            scalar:s1 DIVIDE scalar:s2
+                            scalar:s1 DIV scalar:s2
                             {: RESULT = s1 / s2; :}
-                          |
-                            scalar:s1 MOD scalar:s2
-                            {: RESULT = s1 % s2; :}
                           |
                             scalar:s
                             {: RESULT = s; :}
                           ;
 
-scalar                  ::= INTEGER_LITERAL:il
+scalar                  ::= INUM:il
                             {: RESULT = il; :}
                           |
-                            IDENTIFIER:id
+                            ID:id
                             {: RESULT = idTable.get(id); :}
                           ;
