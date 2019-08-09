@@ -21,7 +21,7 @@ class ParserTest {
         System.setOut(new PrintStream(outContent));
     }
 
-    @Test
+
     void test() throws Exception {
         Scanner scanner = new Scanner(new StringReader("let i=10; 34+i; let j=i+5; j+i;"));
         Parser parser = new Parser(scanner);

@@ -66,7 +66,7 @@ DIV = "/"
   {FNUM}                         { return symbol(sym.FNUM, new Float(yytext())); }
 
   /* separators */
-  {LineTerminator}               { return symbol(sym.SEPARATOR); }
+  {LineTerminator}               { /* ignore */ }
 
   /* operators */
   {ASSIGN}                       { return symbol(sym.ASSIGN); }
