@@ -2,10 +2,11 @@ import java_cup.runtime.*;
 
 import java.util.Map;
 import java.util.HashMap;
+import it.uniupo.disit.linguaggi2.jflexcup.symboltable.*;
 
 parser code {:
 
-    private Map<String, Integer> idTable;
+    private SymTable symTable;
 
     public void report_error(String message, Object info) {
         StringBuilder m = new StringBuilder("Error ");
@@ -19,10 +20,14 @@ parser code {:
         report_error(message, info);
         throw new RuntimeException("Fatal Syntax Error");
     }
+
+    private TypeDescriptor getResultType(LangType type) {
+        return type == LangType.INT_TYPE ? TypeDescriptor.INT : TypeDescriptor.FLOAT;
+    }
 :};
 
 init with {:
-    idTable = new HashMap<>();
+    symTable.init();
 :}
 
 terminal            FLOAT, INT, PRINT;
@@ -45,16 +50,42 @@ precedence left TIMES, DIV;
 
 start with Prog;
 
-Prog                    ::= DSs;
+Prog                    ::= DSs
+                        ;
 
-DSs                     ::= Dcl DSs | Stm DSs | /* empty */;
+DSs                     ::= Dcl DSs
+                        | Stm DSs
+                        | /* empty */
+                        ;
 
-Dcl                     ::= FLOAT ID | INT ID;
+Dcl                     ::= FLOAT ID:id     {: SymTable.enter(id, new Attributes(LangType.FLOAT_TYPE)); :}
+                        | INT ID:id         {: SymTable.enter(id, new Attributes(LangType.INT_TYPE)); :}
+                        ;
 
-Stm                     ::= ID ASSIGN Expr | PRINT ID;
+Stm                     ::= ID:id ASSIGN Expr:expr
+                        | PRINT ID:id               {: RESULT = getResultType(SymTable.lookup(id).getType()); :}
+                        ;
 
-Expr                    ::= Expr Op Expr | Val;
+Expr                    ::= Expr Op Expr
+                        | Val
+                        ;
 
-Op                      ::= PLUS | MINUS | TIMES | DIV;
+Op                      ::= PLUS
+                        | MINUS
+                        | TIMES
+                        | DIV
+                        ;
 
-Val                     ::= INUM | FNUM | ID;
+Val                     ::= INUM
+                        | FNUM
+                        | ID:id
+                        {:
+                             Attributes attr = SymTable.lookup(id);
+                             if (attr == null) {
+                                RESULT = TypeDescriptor.ERROR;
+                                report_error("id: '" + id + "' never declared", id);
+                             } else {
+                                RESULT = getResultType(attr.getType());
+                             }
+                         :}
+                        ;

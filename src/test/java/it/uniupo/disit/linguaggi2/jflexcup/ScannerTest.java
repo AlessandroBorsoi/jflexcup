@@ -36,13 +36,12 @@ class ScannerTest {
 
     @Test
     void scanAnotherSrc() throws Exception {
-        Scanner scanner = new Scanner(new StringReader(
-                "int foo\n" +
-                        "float bar\n" +
-                        "bar = 1.0 / 6\n" +
-                        "print bar\n" +
-                        "foo = 1 * 6\n" +
-                        "print foo"));
+        Scanner scanner = new Scanner(new StringReader("int foo\n" +
+                "float bar\n" +
+                "bar = 1.0 / 6\n" +
+                "print bar\n" +
+                "foo = 1 * 6\n" +
+                "print foo"));
         assertEquals(sym.INT, scanner.next_token().sym);
         assertEquals(sym.ID, scanner.next_token().sym);
         assertEquals(sym.FLOAT, scanner.next_token().sym);
