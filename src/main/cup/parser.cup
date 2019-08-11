@@ -75,7 +75,7 @@ Stm                     ::= ID:id ASSIGN Expr:expr
                                                             TypeDescriptor idType = getResultType(attr.getType());
                                                             if (!compatible(idType, (TypeDescriptor) expr)) {
                                                                 RESULT = TypeDescriptor.ERROR;
-                                                                reportError("type " + idType + " not compatible with " + expr);
+                                                                reportError("type " + idType + " of '" + id + "' not compatible with type " + expr);
                                                             } else {
                                                                 RESULT = TypeDescriptor.FLOAT;
                                                             }
