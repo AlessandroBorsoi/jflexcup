@@ -7,10 +7,8 @@ import it.uniupo.disit.linguaggi2.jflexcup.symboltable.*;
 parser code {:
 
     private SymTable symTable;
-    private StringBuilder errors;
 
-    public void report_error(String message) {
-        //errors.append(message);
+    public void reportError(String message) {
         System.out.println(message);
     }
 
@@ -25,7 +23,6 @@ parser code {:
 
 init with {:
     SymTable.init();
-    errors = new StringBuilder();
 :}
 
 terminal            FLOAT, INT, PRINT;
@@ -48,7 +45,7 @@ precedence left TIMES, DIV;
 
 start with Prog;
 
-Prog                    ::= DSs
+Prog                    ::= DSs:dss                 {: RESULT = dss; :}
                         ;
 
 DSs                     ::= Dcl DSs
@@ -56,8 +53,16 @@ DSs                     ::= Dcl DSs
                         | /* empty */
                         ;
 
-Dcl                     ::= FLOAT ID:id             {: SymTable.enter(id, new Attributes(LangType.FLOAT_TYPE)); :}
-                        | INT ID:id                 {: SymTable.enter(id, new Attributes(LangType.INT_TYPE)); :}
+Dcl                     ::= FLOAT ID:id
+                                                    {:
+                                                        SymTable.enter(id, new Attributes(LangType.FLOAT_TYPE));
+                                                        RESULT = TypeDescriptor.FLOAT;
+                                                     :}
+                        | INT ID:id
+                                                    {:
+                                                        SymTable.enter(id, new Attributes(LangType.INT_TYPE));
+                                                        RESULT = TypeDescriptor.INT;
+                                                     :}
                         ;
 
 Stm                     ::= ID:id ASSIGN Expr:expr
@@ -65,18 +70,27 @@ Stm                     ::= ID:id ASSIGN Expr:expr
                                                         Attributes attr = SymTable.lookup(id);
                                                         if (attr == null) {
                                                             RESULT = TypeDescriptor.ERROR;
-                                                            report_error("id: '" + id + "' never declared");
+                                                            reportError("id: '" + id + "' never declared");
                                                         } else {
                                                             TypeDescriptor idType = getResultType(attr.getType());
                                                             if (!compatible(idType, (TypeDescriptor) expr)) {
                                                                 RESULT = TypeDescriptor.ERROR;
-                                                                report_error("type " + idType + " not compatible with " + expr);
+                                                                reportError("type " + idType + " not compatible with " + expr);
                                                             } else {
                                                                 RESULT = TypeDescriptor.FLOAT;
                                                             }
                                                         }
                                                      :}
-                        | PRINT ID:id               {: RESULT = getResultType(SymTable.lookup(id).getType()); :}
+                        | PRINT ID:id
+                                                    {:
+                                                        Attributes attr = SymTable.lookup(id);
+                                                        if (attr == null) {
+                                                            RESULT = TypeDescriptor.ERROR;
+                                                            reportError("id: '" + id + "' never declared");
+                                                        } else {
+                                                             RESULT = getResultType(attr.getType());
+                                                        }
+                                                     :}
                         ;
 
 Expr                    ::= Expr:e1 Op Expr:e2
@@ -105,7 +119,7 @@ Val                     ::= INUM                    {: RESULT = TypeDescriptor.I
                                                          Attributes attr = SymTable.lookup(id);
                                                          if (attr == null) {
                                                             RESULT = TypeDescriptor.ERROR;
-                                                            report_error("id: '" + id + "' never declared");
+                                                            reportError("id: '" + id + "' never declared");
                                                          } else {
                                                             RESULT = getResultType(attr.getType());
                                                          }

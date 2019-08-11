@@ -50,7 +50,7 @@ class ParserTest {
                 "print b\n"));
         Parser parser = new Parser(scanner);
         parser.parse();
-        //assertEquals("type INT not compatible with FLOAT\n" +
-          //      "type INT not compatible with FLOAT", outContent.toString());
+        assertEquals("type INT not compatible with FLOAT\n" +
+                "type INT not compatible with FLOAT\n", outContent.toString());
     }
 }
