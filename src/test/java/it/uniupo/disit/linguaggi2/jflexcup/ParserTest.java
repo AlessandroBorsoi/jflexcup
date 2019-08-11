@@ -26,7 +26,7 @@ class ParserTest {
         Scanner scanner = new Scanner(new StringReader("a = 5"));
         Parser parser = new Parser(scanner);
         parser.parse();
-        assertEquals("", outContent.toString());
+        assertEquals("id: 'a' never declared\n", outContent.toString());
     }
 
     @Test
